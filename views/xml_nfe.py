@@ -47,7 +47,7 @@ def processar_arquivo(arquivo):
 
 apply_base_style()
 render_sidebar_brand()
-render_page_header("XML NF-e", "Processamento de XML e Excel.")
+render_page_header("Reparador de XML", "Processamento de XML e Excel.")
 inicializar_estado()
 
 try:

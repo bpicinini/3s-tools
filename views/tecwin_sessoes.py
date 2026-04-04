@@ -31,7 +31,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-render_page_header("Sessões TecWin", "Monitoramento de sessões.")
+render_page_header("Acessos TECWIN", "Monitoramento de sessões.")
 
 
 def conectar_tecwin(login_usuario, senha_usuario):
