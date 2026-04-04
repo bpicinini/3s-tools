@@ -12,9 +12,9 @@ div[data-testid="stButton"] button {
     background: #ffffff;
     border: 1px solid #e4ddd1;
     border-radius: 16px;
-    padding: 26px 24px;
+    padding: 28px 26px;
     width: 100%;
-    min-height: 250px;
+    min-height: 280px;
     text-align: left;
     white-space: normal;
     color: #1f2933;
@@ -44,7 +44,7 @@ div[data-testid="stButton"] button p {
 
 render_page_header("Ferramentas", "Selecione um módulo.")
 
-col1, col2, col3 = st.columns(3, gap="small")
+col1, col2 = st.columns(2, gap="small")
 
 with col1:
     if st.button(
@@ -60,6 +60,7 @@ with col2:
     ):
         st.switch_page("views/tecwin_sessoes.py")
 
+col3, _ = st.columns([1, 1], gap="small")
 with col3:
     st.button(
         "📊\n\n**Conversor**\n\nPadronização de planilhas\n\nEm breve",
