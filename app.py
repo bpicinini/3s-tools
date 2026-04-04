@@ -11,9 +11,9 @@ pg = st.navigation({
         st.Page("pages/home.py", title="Home", icon="🏠"),
     ],
     "Ferramentas": [
-        st.Page("pages/1_XML_NFe.py", title="XML NF-e", icon="📄"),
-        st.Page("pages/2_TecWin_Sessoes.py", title="Sessões TecWin", icon="👥"),
-        st.Page("pages/3_Conversor.py", title="Conversor", icon="📊"),
+        st.Page("pages/xml_nfe.py", title="XML NF-e", icon="📄"),
+        st.Page("pages/tecwin_sessoes.py", title="Sessões TecWin", icon="👥"),
+        st.Page("pages/conversor.py", title="Conversor", icon="📊"),
     ],
 })
 pg.run()

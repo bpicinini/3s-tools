@@ -45,7 +45,7 @@ with col1:
         <span class="card-badge badge-active">✓ Disponível</span>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/1_XML_NFe.py", label="Abrir XML NF-e →")
+    st.page_link("pages/xml_nfe.py", label="Abrir XML NF-e →")
 
 with col2:
     st.markdown("""
@@ -56,7 +56,7 @@ with col2:
         <span class="card-badge badge-active">✓ Disponível</span>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/2_TecWin_Sessoes.py", label="Abrir Sessões TecWin →")
+    st.page_link("pages/tecwin_sessoes.py", label="Abrir Sessões TecWin →")
 
 with col3:
     st.markdown("""
