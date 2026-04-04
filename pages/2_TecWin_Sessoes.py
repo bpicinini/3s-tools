@@ -2,11 +2,43 @@ import streamlit as st
 import pandas as pd
 from modules.tecwin.tecwin import login, listar_usuarios_online, desconectar_usuario, desconectar_pendurados
 
-st.set_page_config(page_title="Sessões TecWin — 3S Tools", layout="wide")
-st.title("Gerenciador de Sessões TecWin")
-st.caption("Visualize e desconecte usuários pendurados no sistema.")
+st.markdown("""
+<style>
+.page-title { font-size: 1.6rem; font-weight: 800; color: #1E3A5F; margin-bottom: 2px; }
+.page-sub   { font-size: 0.95rem; color: #666; margin-bottom: 20px; }
+.user-card {
+    background: #f8f9fb;
+    border: 1px solid #e3e6ed;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.user-card.pendurado {
+    background: #fff5f5;
+    border-color: #f5c6c6;
+}
+.user-name  { font-weight: 700; color: #1E3A5F; font-size: 0.97rem; }
+.user-info  { font-size: 0.83rem; color: #777; margin-top: 2px; }
+.badge-ok   { background: #e6f4ea; color: #2d7a3a; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+.badge-pend { background: #fde8e8; color: #c0392b; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+.metric-card {
+    background: #f0f4fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-align: center;
+}
+.metric-val  { font-size: 2rem; font-weight: 800; color: #1E3A5F; }
+.metric-label { font-size: 0.82rem; color: #666; margin-top: 2px; }
+</style>
+""", unsafe_allow_html=True)
 
-# Carregar credenciais dos secrets (nunca expostas ao usuário)
+st.markdown('<div class="page-title">👥 Sessões TecWin</div>', unsafe_allow_html=True)
+st.markdown('<div class="page-sub">Monitore e gerencie os usuários conectados ao sistema</div>', unsafe_allow_html=True)
+
+# Credenciais
 try:
     TECWIN_LOGIN = st.secrets["TECWIN_LOGIN"]
     TECWIN_SENHA = st.secrets["TECWIN_SENHA"]
@@ -16,12 +48,6 @@ except Exception:
     st.stop()
 
 limite = LIMITE_MINUTOS
-
-st.divider()
-
-atualizar = st.button("Atualizar lista")
-
-st.divider()
 
 # Login: só cria nova sessão se não existir uma ativa
 if "session" not in st.session_state:
@@ -37,7 +63,9 @@ if "session" not in st.session_state:
             st.error(f"Erro inesperado: {e}")
             st.stop()
 
-# Buscar usuários (ao carregar ou ao clicar em Atualizar)
+# Buscar usuários
+atualizar = st.button("🔄 Atualizar lista")
+
 if "usuarios" not in st.session_state or atualizar:
     with st.spinner("Buscando usuários online..."):
         try:
@@ -45,7 +73,6 @@ if "usuarios" not in st.session_state or atualizar:
             usuarios = listar_usuarios_online(st.session_state["session"], excluir_login_id=portal_login_id)
             st.session_state["usuarios"] = usuarios
         except Exception:
-            # Sessão pode ter expirado — relogar
             try:
                 session, portal_login_id = login(TECWIN_LOGIN, TECWIN_SENHA)
                 st.session_state["session"] = session
@@ -59,85 +86,63 @@ if "usuarios" not in st.session_state or atualizar:
 usuarios = st.session_state.get("usuarios", [])
 session = st.session_state["session"]
 
+st.divider()
+
+# Métricas
+pendurados = [u for u in usuarios if u["minutos"] is not None and u["minutos"] >= limite]
+total = len(usuarios)
+qtd_pendurados = len(pendurados)
+slots_livres = max(0, 8 - total)
+
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-val">{total}</div>
+        <div class="metric-label">Usuários online</div>
+    </div>""", unsafe_allow_html=True)
+with c2:
+    cor = "#c0392b" if qtd_pendurados > 0 else "#1E3A5F"
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-val" style="color:{cor}">{qtd_pendurados}</div>
+        <div class="metric-label">Pendurados (&gt;{limite} min)</div>
+    </div>""", unsafe_allow_html=True)
+with c3:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-val">{slots_livres}</div>
+        <div class="metric-label">Slots disponíveis (de 8)</div>
+    </div>""", unsafe_allow_html=True)
+
+st.divider()
+
 if not usuarios:
     st.info("Nenhum usuário online no momento.")
     st.stop()
 
-# Montar DataFrame
-linhas = []
+# Lista de usuários como cards
+st.markdown("#### Usuários conectados")
+
 for u in usuarios:
     pendurado = u["minutos"] is not None and u["minutos"] >= limite
-    linhas.append({
-        "Nome": u["nome"],
-        "Login às": u["data_login_str"],
-        "Tempo (min)": u["minutos"] if u["minutos"] is not None else "—",
-        "IP": u["ip"],
-        "Status": "PENDURADO" if pendurado else "OK",
-        "_login_id": u["login_id"],
-        "_pendurado": pendurado,
-    })
+    badge = '<span class="badge-pend">⚠ Pendurado</span>' if pendurado else '<span class="badge-ok">✓ Ativo</span>'
+    minutos_txt = f"{u['minutos']} min" if u["minutos"] is not None else "—"
+    card_class = "user-card pendurado" if pendurado else "user-card"
 
-df = pd.DataFrame(linhas)
-
-pendurados = [u for u in usuarios if u["minutos"] is not None and u["minutos"] >= limite]
-total = len(usuarios)
-qtd_pendurados = len(pendurados)
-
-m1, m2, m3 = st.columns(3)
-m1.metric("Usuários online", total)
-m2.metric("Pendurados (>%d min)" % limite, qtd_pendurados)
-m3.metric("Slots livres", max(0, 8 - total))
-
-st.divider()
-
-# Colorir linhas penduradas
-def colorir_linha(row):
-    if row["Status"] == "PENDURADO":
-        return ["background-color: #ffd6d6"] * len(row)
-    return [""] * len(row)
-
-df_exibir = df[["Nome", "Login às", "Tempo (min)", "IP", "Status"]].copy()
-styled = df_exibir.style.apply(colorir_linha, axis=1)
-
-st.dataframe(styled, use_container_width=True, hide_index=True)
-
-st.divider()
-
-col_a, col_b = st.columns(2)
-
-with col_a:
-    if qtd_pendurados == 0:
-        st.success("Nenhum usuário pendurado. Tudo certo!")
-    else:
-        if st.button(
-            f"Desconectar todos os pendurados ({qtd_pendurados})",
-            type="primary",
-            use_container_width=True,
-        ):
-            with st.spinner("Desconectando..."):
-                try:
-                    portal_login_id = st.session_state.get("portal_login_id")
-                    desconectados = desconectar_pendurados(session, minutos=limite, excluir_login_id=portal_login_id)
-                    if desconectados:
-                        nomes = ", ".join(d["nome"] for d in desconectados)
-                        st.success(f"{len(desconectados)} usuário(s) desconectado(s): {nomes}")
-                    else:
-                        st.warning("Nenhum usuário foi desconectado (talvez já tenham saído).")
-                    # Limpar cache para atualizar na próxima vez
-                    del st.session_state["usuarios"]
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Erro ao desconectar: {e}")
-
-with col_b:
-    st.write("**Desconectar individualmente:**")
-    for u in usuarios:
-        if not u["login_id"]:
-            continue
-        label = f"{u['nome']} ({u['minutos']} min)" if u["minutos"] is not None else u["nome"]
-        pendurado = u["minutos"] is not None and u["minutos"] >= limite
+    col_info, col_btn = st.columns([5, 1])
+    with col_info:
+        st.markdown(f"""
+        <div class="{card_class}">
+            <div>
+                <div class="user-name">👤 {u['nome']}</div>
+                <div class="user-info">Login: {u['data_login_str']} &nbsp;|&nbsp; {minutos_txt} conectado &nbsp;|&nbsp; IP: {u['ip']}</div>
+            </div>
+            <div>{badge}</div>
+        </div>""", unsafe_allow_html=True)
+    with col_btn:
         if pendurado:
-            if st.button(f"Desconectar {label}", key=f"btn_{u['login_id']}", use_container_width=True):
+            if st.button("Desconectar", key=f"btn_{u['login_id']}", type="primary", use_container_width=True):
                 with st.spinner(f"Desconectando {u['nome']}..."):
                     try:
                         sucesso = desconectar_usuario(session, u["login_id"])
@@ -150,4 +155,25 @@ with col_b:
                     except Exception as e:
                         st.error(f"Erro: {e}")
         else:
-            st.button(f"{label} — ativo", key=f"btn_{u['login_id']}", disabled=True, use_container_width=True)
+            st.button("Ativo", key=f"btn_{u['login_id']}", disabled=True, use_container_width=True)
+
+st.divider()
+
+# Botão desconectar todos
+if qtd_pendurados == 0:
+    st.success("Nenhum usuário pendurado. Tudo certo!")
+else:
+    if st.button(f"⚡ Desconectar todos os pendurados ({qtd_pendurados})", type="primary"):
+        with st.spinner("Desconectando..."):
+            try:
+                portal_login_id = st.session_state.get("portal_login_id")
+                desconectados = desconectar_pendurados(session, minutos=limite, excluir_login_id=portal_login_id)
+                if desconectados:
+                    nomes = ", ".join(d["nome"] for d in desconectados)
+                    st.success(f"{len(desconectados)} usuário(s) desconectado(s): {nomes}")
+                else:
+                    st.warning("Nenhum usuário foi desconectado (talvez já tenham saído).")
+                del st.session_state["usuarios"]
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro ao desconectar: {e}")
