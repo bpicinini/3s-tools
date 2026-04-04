@@ -21,13 +21,14 @@ st.markdown("""
 }
 
 .user-card.pendurado {
-    background: #fffaf6;
+    background: #fff1f0;
+    border-color: #efc2bd;
 }
 
 .user-name  { font-weight: 700; color: #1f3550; font-size: 0.95rem; }
 .user-info  { font-size: 0.82rem; color: #6e6254; margin-top: 2px; }
 .badge-ok   { background: #e9f2e8; color: #4c7f4b; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
-.badge-pend { background: #f3ece3; color: #8a6b42; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
+.badge-pend { background: #fde2df; color: #ba3b32; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
