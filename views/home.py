@@ -50,6 +50,7 @@ with col1:
     if st.button(
         "📄\n\n**XML NF-e**\n\nXML e Excel\n\nDisponível",
         key="btn_xml",
+        use_container_width=True,
     ):
         st.switch_page("views/xml_nfe.py")
 
@@ -57,6 +58,7 @@ with col2:
     if st.button(
         "👥\n\n**Sessões TecWin**\n\nMonitoramento e desconexão\n\nDisponível",
         key="btn_tecwin",
+        use_container_width=True,
     ):
         st.switch_page("views/tecwin_sessoes.py")
 
@@ -65,4 +67,5 @@ with col3:
         "📊\n\n**Conversor**\n\nPadronização de planilhas\n\nEm breve",
         key="btn_conversor",
         disabled=True,
+        use_container_width=True,
     )
