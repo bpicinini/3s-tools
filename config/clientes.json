@@ -1,0 +1,12 @@
+{
+  "Ramarim": {
+    "descricao": "Reordena descrição dos itens: referência do produto na frente, texto NCM depois",
+    "regras": [
+      {
+        "tipo": "reordenar_descricao_xprod",
+        "campo": "xProd",
+        "inserir_cProd_se_ausente": true
+      }
+    ]
+  }
+}
