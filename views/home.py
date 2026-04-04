@@ -2,6 +2,16 @@ import streamlit as st
 
 st.markdown("""
 <style>
+.card-wrap {
+    position: relative;
+    border-radius: 12px;
+}
+.card-wrap a {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    border-radius: 12px;
+}
 .card {
     background: #f8f9fb;
     border: 1px solid #e3e6ed;
@@ -9,13 +19,15 @@ st.markdown("""
     padding: 28px 24px;
     height: 100%;
     transition: box-shadow 0.2s;
+    cursor: pointer;
 }
-.card:hover {
-    box-shadow: 0 4px 16px rgba(30,58,95,0.10);
+.card-wrap:hover .card {
+    box-shadow: 0 4px 16px rgba(30,58,95,0.12);
+    border-color: #1E3A5F;
 }
-.card-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.card-icon  { font-size: 2.2rem; margin-bottom: 10px; }
 .card-title { font-size: 1.15rem; font-weight: 700; color: #1E3A5F; margin-bottom: 6px; }
-.card-desc { font-size: 0.92rem; color: #555; line-height: 1.5; }
+.card-desc  { font-size: 0.92rem; color: #555; line-height: 1.5; }
 .card-badge {
     display: inline-block;
     margin-top: 14px;
@@ -28,6 +40,15 @@ st.markdown("""
 .badge-soon   { background: #f0f0f0; color: #888; }
 .hero-title { font-size: 2rem; font-weight: 800; color: #1E3A5F; margin-bottom: 4px; }
 .hero-sub   { font-size: 1rem; color: #666; margin-bottom: 32px; }
+
+/* Esconder o texto dos page_links mantendo o elemento clicável */
+[data-testid="stPageLink"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    z-index: 20;
+}
+[data-testid="stPageLink"] p { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -45,7 +66,7 @@ with col1:
         <span class="card-badge badge-active">✓ Disponível</span>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("views/xml_nfe.py", label="Abrir XML NF-e →")
+    st.page_link("views/xml_nfe.py", label=" ")
 
 with col2:
     st.markdown("""
@@ -56,7 +77,7 @@ with col2:
         <span class="card-badge badge-active">✓ Disponível</span>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("views/tecwin_sessoes.py", label="Abrir Sessões TecWin →")
+    st.page_link("views/tecwin_sessoes.py", label=" ")
 
 with col3:
     st.markdown("""
