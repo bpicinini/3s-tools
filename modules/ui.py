@@ -1,4 +1,5 @@
 import html
+from textwrap import dedent
 
 import streamlit as st
 
@@ -264,12 +265,12 @@ def render_sidebar_brand(title: str = "3S Tools", subtitle: str | None = None) -
     )
     with st.sidebar:
         st.markdown(
-            f"""
+            dedent(f"""
             <section class="sidebar-brand">
                 <div class="sidebar-brand-title">3S <span>Tools</span></div>
                 {subtitle_html}
             </section>
-            """,
+            """).strip(),
             unsafe_allow_html=True,
         )
 
@@ -278,13 +279,13 @@ def render_page_header(title: str, subtitle: str | None = None, kicker: str | No
     kicker_html = f'<div class="page-kicker">{html.escape(kicker)}</div>' if kicker else ""
     subtitle_html = f'<div class="page-subtitle">{html.escape(subtitle)}</div>' if subtitle else ""
     st.markdown(
-        f"""
+        dedent(f"""
         <section class="page-hero">
             {kicker_html}
             <div class="page-title">{html.escape(title)}</div>
             {subtitle_html}
         </section>
-        """,
+        """).strip(),
         unsafe_allow_html=True,
     )
 
@@ -298,13 +299,13 @@ def render_metric_cards(metrics: list[dict]) -> None:
         help_html = f'<div class="metric-help">{html.escape(help_text)}</div>' if help_text else ""
         with column:
             st.markdown(
-                f"""
+                dedent(f"""
                 <div class="metric-card{tone_class}">
                     <div class="metric-label">{html.escape(str(metric["label"]))}</div>
                     <div class="metric-value">{html.escape(str(metric["value"]))}</div>
                     {help_html}
                 </div>
-                """,
+                """).strip(),
                 unsafe_allow_html=True,
             )
 
@@ -316,12 +317,12 @@ def render_info_panel(title: str, body: str, chips: list[str] | None = None) -> 
             f'<span class="info-chip">{html.escape(chip)}</span>' for chip in chips
         ) + "</div>"
     st.markdown(
-        f"""
+        dedent(f"""
         <section class="info-panel">
             <h3>{html.escape(title)}</h3>
             <p>{html.escape(body)}</p>
             {chip_html}
         </section>
-        """,
+        """).strip(),
         unsafe_allow_html=True,
     )
