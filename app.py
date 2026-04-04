@@ -8,12 +8,12 @@ st.set_page_config(
 
 pg = st.navigation({
     "": [
-        st.Page("pages/home.py", title="Home", icon="🏠"),
+        st.Page("views/home.py", title="Home", icon="🏠"),
     ],
     "Ferramentas": [
-        st.Page("pages/xml_nfe.py", title="XML NF-e", icon="📄"),
-        st.Page("pages/tecwin_sessoes.py", title="Sessões TecWin", icon="👥"),
-        st.Page("pages/conversor.py", title="Conversor", icon="📊"),
+        st.Page("views/xml_nfe.py", title="XML NF-e", icon="📄"),
+        st.Page("views/tecwin_sessoes.py", title="Sessões TecWin", icon="👥"),
+        st.Page("views/conversor.py", title="Conversor", icon="📊"),
     ],
 })
 pg.run()
