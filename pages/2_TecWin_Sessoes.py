@@ -121,8 +121,11 @@ with col_a:
 with col_b:
     st.write("**Desconectar individualmente:**")
     for u in usuarios:
-        if u["login_id"]:
-            label = f"{u['nome']} ({u['minutos']} min)" if u["minutos"] is not None else u["nome"]
+        if not u["login_id"]:
+            continue
+        label = f"{u['nome']} ({u['minutos']} min)" if u["minutos"] is not None else u["nome"]
+        pendurado = u["minutos"] is not None and u["minutos"] >= limite
+        if pendurado:
             if st.button(f"Desconectar {label}", key=f"btn_{u['login_id']}", use_container_width=True):
                 with st.spinner(f"Desconectando {u['nome']}..."):
                     try:
@@ -135,3 +138,5 @@ with col_b:
                         st.rerun()
                     except Exception as e:
                         st.error(f"Erro: {e}")
+        else:
+            st.button(f"{label} — ativo", key=f"btn_{u['login_id']}", disabled=True, use_container_width=True)
