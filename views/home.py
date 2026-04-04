@@ -38,6 +38,15 @@ div[data-testid="stButton"] button:focus {
 
 div[data-testid="stButton"] button p {
     margin: 0;
+    font-size: 1.12rem;
+    line-height: 1.65;
+}
+
+div[data-testid="stButton"] button strong {
+    display: inline-block;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    margin: 0.2rem 0 0.35rem 0;
 }
 </style>
 """, unsafe_allow_html=True)
