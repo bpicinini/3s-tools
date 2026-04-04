@@ -12,9 +12,9 @@ div[data-testid="stButton"] button {
     background: #ffffff;
     border: 1px solid #e4ddd1;
     border-radius: 16px;
-    padding: 22px 20px;
+    padding: 26px 24px;
     width: 100%;
-    min-height: 210px;
+    min-height: 250px;
     text-align: left;
     white-space: normal;
     color: #1f2933;
@@ -44,7 +44,7 @@ div[data-testid="stButton"] button p {
 
 render_page_header("Ferramentas", "Selecione um módulo.")
 
-col1, col2, col3 = st.columns(3, gap="medium")
+col1, col2, col3 = st.columns(3, gap="small")
 
 with col1:
     if st.button(

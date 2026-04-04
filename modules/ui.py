@@ -276,12 +276,12 @@ def render_sidebar_brand(title: str = "3S Tools", subtitle: str | None = None) -
 
 def render_page_header(title: str, subtitle: str | None = None, kicker: str | None = None) -> None:
     kicker_html = f'<div class="page-kicker">{html.escape(kicker)}</div>' if kicker else ""
-    subtitle_html = f'<p class="page-subtitle">{html.escape(subtitle)}</p>' if subtitle else ""
+    subtitle_html = f'<div class="page-subtitle">{html.escape(subtitle)}</div>' if subtitle else ""
     st.markdown(
         f"""
         <section class="page-hero">
             {kicker_html}
-            <h1 class="page-title">{html.escape(title)}</h1>
+            <div class="page-title">{html.escape(title)}</div>
             {subtitle_html}
         </section>
         """,
