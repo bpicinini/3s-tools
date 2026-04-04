@@ -10,6 +10,9 @@ Fluxo:
 
 import requests
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+TZ_BR = ZoneInfo("America/Sao_Paulo")
 
 BASE_URL = "https://tecwinweb.aduaneiras.com.br"
 URL_LOGIN_HANDLER = f"{BASE_URL}/Handlers/Modulos/Usuario/Login.ashx"
@@ -105,7 +108,9 @@ def _parsear_data(data_str: str) -> datetime | None:
 
 
 def _calcular_minutos(data_login: datetime) -> int:
-    delta = datetime.now() - data_login
+    # Usa horário de Brasília para comparar com os tempos enviados pelo TecWin
+    agora = datetime.now(TZ_BR).replace(tzinfo=None)
+    delta = agora - data_login
     return int(delta.total_seconds() / 60)
 
 

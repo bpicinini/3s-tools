@@ -31,14 +31,11 @@ with col2:
 
 st.divider()
 
-# Buscar usuários (ao carregar ou ao clicar em Atualizar)
-if "usuarios" not in st.session_state or atualizar:
+# Login: só cria nova sessão se não existir uma ativa
+if "session" not in st.session_state:
     with st.spinner("Conectando ao TecWin..."):
         try:
-            session = login(TECWIN_LOGIN, TECWIN_SENHA)
-            usuarios = listar_usuarios_online(session)
-            st.session_state["usuarios"] = usuarios
-            st.session_state["session"] = session
+            st.session_state["session"] = login(TECWIN_LOGIN, TECWIN_SENHA)
         except RuntimeError as e:
             st.error(f"Erro ao conectar: {e}")
             st.stop()
@@ -46,8 +43,24 @@ if "usuarios" not in st.session_state or atualizar:
             st.error(f"Erro inesperado: {e}")
             st.stop()
 
+# Buscar usuários (ao carregar ou ao clicar em Atualizar)
+if "usuarios" not in st.session_state or atualizar:
+    with st.spinner("Buscando usuários online..."):
+        try:
+            usuarios = listar_usuarios_online(st.session_state["session"])
+            st.session_state["usuarios"] = usuarios
+        except Exception:
+            # Sessão pode ter expirado — relogar
+            try:
+                st.session_state["session"] = login(TECWIN_LOGIN, TECWIN_SENHA)
+                usuarios = listar_usuarios_online(st.session_state["session"])
+                st.session_state["usuarios"] = usuarios
+            except Exception as e:
+                st.error(f"Erro ao buscar usuários: {e}")
+                st.stop()
+
 usuarios = st.session_state.get("usuarios", [])
-session = st.session_state.get("session")
+session = st.session_state["session"]
 
 if not usuarios:
     st.info("Nenhum usuário online no momento.")
