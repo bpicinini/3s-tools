@@ -18,12 +18,14 @@ st.markdown("""
     border-radius: 12px;
     padding: 28px 24px;
     height: 100%;
-    transition: box-shadow 0.2s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     cursor: pointer;
 }
 .card-wrap:hover .card {
-    box-shadow: 0 4px 16px rgba(30,58,95,0.12);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(30,58,95,0.15);
     border-color: #1E3A5F;
+    background: #ffffff;
 }
 .card-icon  { font-size: 2.2rem; margin-bottom: 10px; }
 .card-title { font-size: 1.15rem; font-weight: 700; color: #1E3A5F; margin-bottom: 6px; }
