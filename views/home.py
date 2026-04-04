@@ -57,7 +57,7 @@ col1, col2, col3 = st.columns(3, gap="small")
 
 with col1:
     if st.button(
-        "👥\n\n**Acessos TECWIN**\n\nMonitoramento e desconexão\n\nDisponível",
+        "👥\n\n**Acessos TECWIN**\n\nMonitoramento e desconexão",
         key="btn_tecwin",
         use_container_width=True,
     ):
@@ -65,7 +65,7 @@ with col1:
 
 with col2:
     if st.button(
-        "📄\n\n**Reparador de XML**\n\nXML e Excel\n\nDisponível",
+        "📄\n\n**Reparador de XML**\n\nXML e Excel",
         key="btn_xml",
         use_container_width=True,
     ):
