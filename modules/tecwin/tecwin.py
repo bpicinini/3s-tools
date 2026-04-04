@@ -2,17 +2,18 @@
 Módulo de automação TecWin — gerencia sessões de usuários online.
 
 Fluxo:
-1. login() → abre sessão autenticada
+1. login() → abre sessão autenticada, retorna (session, portal_login_id)
 2. listar_usuarios_online() → retorna lista com nome, dataLogin, tempo, IP
 3. desconectar_usuario() → desconecta um usuário pelo loginId
 4. desconectar_pendurados() → desconecta todos acima de N minutos
 """
 
 import requests
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
-TZ_BR = ZoneInfo("America/Sao_Paulo")
+# Offset fixo para horário de Brasília (UTC-3)
+# Evita dependência de tzdata que pode não estar instalado no Streamlit Cloud
+BRT_OFFSET = timedelta(hours=-3)
 
 BASE_URL = "https://tecwinweb.aduaneiras.com.br"
 URL_LOGIN_HANDLER = f"{BASE_URL}/Handlers/Modulos/Usuario/Login.ashx"
@@ -26,9 +27,11 @@ HEADERS = {
 }
 
 
-def login(email: str, senha: str) -> requests.Session:
-    """Autentica no TecWin e retorna a sessão com cookies ativos.
+def login(email: str, senha: str) -> tuple[requests.Session, str | None]:
+    """Autentica no TecWin.
 
+    Retorna (session, portal_login_id) onde portal_login_id é o loginId
+    da sessão criada pelo portal — deve ser excluído da listagem de usuários.
     Lança RuntimeError se o login falhar.
     """
     session = requests.Session()
@@ -56,11 +59,40 @@ def login(email: str, senha: str) -> requests.Session:
         }
         raise RuntimeError(mensagens.get(status, f"Falha no login: {status}"))
 
-    return session
+    # Identificar a sessão criada pelo próprio portal:
+    # logo após o login, a sessão mais recente na lista é a nossa
+    portal_login_id = _capturar_proprio_login_id(session)
+
+    return session, portal_login_id
 
 
-def listar_usuarios_online(session: requests.Session) -> list[dict]:
+def _capturar_proprio_login_id(session: requests.Session) -> str | None:
+    """Chama action=12 logo após o login para capturar o loginId da sessão do portal.
+
+    A sessão mais recente (maior dataLogin) que ainda não existia antes é a nossa.
+    """
+    try:
+        resp = session.post(URL_CONFIG_HANDLER, data={"action": "12"}, timeout=15)
+        filhotes = resp.json().get("listaFilhotes", [])
+
+        # Pegar o mais recente (último da lista ou maior dataLogin)
+        mais_recente = None
+        mais_recente_dt = None
+        for u in filhotes:
+            dt = _parsear_data(u.get("dataLogin", ""))
+            if dt and (mais_recente_dt is None or dt > mais_recente_dt):
+                mais_recente_dt = dt
+                mais_recente = str(u.get("loginId", ""))
+
+        return mais_recente
+    except Exception:
+        return None
+
+
+def listar_usuarios_online(session: requests.Session, excluir_login_id: str | None = None) -> list[dict]:
     """Retorna lista de usuários atualmente online.
+
+    excluir_login_id: loginId da própria sessão do portal (para não exibir).
 
     Cada item tem:
     - login_id (str): identificador para desconexão
@@ -80,11 +112,17 @@ def listar_usuarios_online(session: requests.Session) -> list[dict]:
 
     usuarios = []
     for u in filhotes:
+        login_id = str(u.get("loginId", ""))
+
+        # Ocultar a sessão criada pelo próprio portal
+        if excluir_login_id and login_id == excluir_login_id:
+            continue
+
         data_login = _parsear_data(u.get("dataLogin", ""))
         minutos = _calcular_minutos(data_login) if data_login else None
 
         usuarios.append({
-            "login_id": str(u.get("loginId", "")),
+            "login_id": login_id,
             "nome": u.get("nome", ""),
             "empresa": u.get("empresa", ""),
             "data_login": data_login,
@@ -108,10 +146,10 @@ def _parsear_data(data_str: str) -> datetime | None:
 
 
 def _calcular_minutos(data_login: datetime) -> int:
-    # Usa horário de Brasília para comparar com os tempos enviados pelo TecWin
-    agora = datetime.now(TZ_BR).replace(tzinfo=None)
-    delta = agora - data_login
-    return int(delta.total_seconds() / 60)
+    # TecWin envia horários em BRT (UTC-3). Comparamos com agora em BRT.
+    agora_brt = datetime.now(timezone.utc).astimezone(timezone(BRT_OFFSET)).replace(tzinfo=None)
+    delta = agora_brt - data_login
+    return max(0, int(delta.total_seconds() / 60))
 
 
 def desconectar_usuario(session: requests.Session, login_id: str) -> bool:
@@ -129,13 +167,13 @@ def desconectar_usuario(session: requests.Session, login_id: str) -> bool:
         return resp.status_code == 200
 
 
-def desconectar_pendurados(session: requests.Session, minutos: int = 30) -> list[dict]:
+def desconectar_pendurados(session: requests.Session, minutos: int = 30, excluir_login_id: str | None = None) -> list[dict]:
     """Desconecta todos os usuários com sessão aberta há mais de N minutos.
 
     Usuários do tipo 'Administrador' não são desconectados automaticamente.
     Retorna lista de usuários desconectados.
     """
-    usuarios = listar_usuarios_online(session)
+    usuarios = listar_usuarios_online(session, excluir_login_id=excluir_login_id)
     desconectados = []
 
     for u in usuarios:

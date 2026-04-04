@@ -35,7 +35,9 @@ st.divider()
 if "session" not in st.session_state:
     with st.spinner("Conectando ao TecWin..."):
         try:
-            st.session_state["session"] = login(TECWIN_LOGIN, TECWIN_SENHA)
+            session, portal_login_id = login(TECWIN_LOGIN, TECWIN_SENHA)
+            st.session_state["session"] = session
+            st.session_state["portal_login_id"] = portal_login_id
         except RuntimeError as e:
             st.error(f"Erro ao conectar: {e}")
             st.stop()
@@ -47,13 +49,16 @@ if "session" not in st.session_state:
 if "usuarios" not in st.session_state or atualizar:
     with st.spinner("Buscando usuários online..."):
         try:
-            usuarios = listar_usuarios_online(st.session_state["session"])
+            portal_login_id = st.session_state.get("portal_login_id")
+            usuarios = listar_usuarios_online(st.session_state["session"], excluir_login_id=portal_login_id)
             st.session_state["usuarios"] = usuarios
         except Exception:
             # Sessão pode ter expirado — relogar
             try:
-                st.session_state["session"] = login(TECWIN_LOGIN, TECWIN_SENHA)
-                usuarios = listar_usuarios_online(st.session_state["session"])
+                session, portal_login_id = login(TECWIN_LOGIN, TECWIN_SENHA)
+                st.session_state["session"] = session
+                st.session_state["portal_login_id"] = portal_login_id
+                usuarios = listar_usuarios_online(session, excluir_login_id=portal_login_id)
                 st.session_state["usuarios"] = usuarios
             except Exception as e:
                 st.error(f"Erro ao buscar usuários: {e}")
@@ -119,7 +124,8 @@ with col_a:
         ):
             with st.spinner("Desconectando..."):
                 try:
-                    desconectados = desconectar_pendurados(session, minutos=limite)
+                    portal_login_id = st.session_state.get("portal_login_id")
+                    desconectados = desconectar_pendurados(session, minutos=limite, excluir_login_id=portal_login_id)
                     if desconectados:
                         nomes = ", ".join(d["nome"] for d in desconectados)
                         st.success(f"{len(desconectados)} usuário(s) desconectado(s): {nomes}")
