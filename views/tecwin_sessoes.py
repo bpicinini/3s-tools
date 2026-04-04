@@ -1,41 +1,37 @@
 import streamlit as st
 
 from modules.tecwin.tecwin import desconectar_pendurados, desconectar_usuario, listar_usuarios_online, login
-from modules.ui import apply_base_style, render_info_panel, render_metric_cards, render_page_header, render_sidebar_brand
+from modules.ui import apply_base_style, render_metric_cards, render_page_header, render_sidebar_brand
 
 
 apply_base_style()
-render_sidebar_brand(subtitle="Gestão de sessões e recuperação rápida de slots.")
+render_sidebar_brand()
 st.markdown("""
 <style>
 .user-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(244,248,252,0.97));
-    border: 1px solid #d5dfeb;
-    border-radius: 18px;
-    padding: 16px 20px;
-    margin-bottom: 10px;
+    background: #ffffff;
+    border: 1px solid #e4ddd1;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 10px 24px rgba(31, 53, 80, 0.05);
 }
 
 .user-card.pendurado {
-    background: linear-gradient(180deg, rgba(253,236,235,0.95), rgba(255,255,255,0.98));
-    border-color: #f1c7c4;
+    background: #fffaf6;
 }
 
-.user-name  { font-weight: 700; color: #16324f; font-size: 0.97rem; }
-.user-info  { font-size: 0.83rem; color: #5b6773; margin-top: 2px; }
-.badge-ok   { background: #e6f4ea; color: #2d7a3a; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
-.badge-pend { background: #fde8e8; color: #c0392b; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+.user-name  { font-weight: 700; color: #1f3550; font-size: 0.95rem; }
+.user-info  { font-size: 0.82rem; color: #6e6254; margin-top: 2px; }
+.badge-ok   { background: #e9f2e8; color: #4c7f4b; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
+.badge-pend { background: #f3ece3; color: #8a6b42; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
-render_page_header(
-    "Sessões TecWin",
-    "Monitore usuários conectados, identifique sessões acima do limite e libere vagas do ambiente com mais segurança.",
-    kicker="Acesso",
-)
+render_page_header("Sessões TecWin", "Monitoramento de sessões.")
 
 
 def conectar_tecwin(login_usuario, senha_usuario):
@@ -83,17 +79,11 @@ if "session" not in st.session_state:
             st.error(f"Erro inesperado: {exc}")
             st.stop()
 
-render_info_panel(
-    "Operação do módulo",
-    "A tela exclui a própria sessão do portal da listagem e prioriza o destaque de usuários acima do limite configurado.",
-    chips=[f"Limite atual: {LIMITE_MINUTOS} min", f"Capacidade: {TOTAL_SLOTS} slots"],
-)
-
 controles_col, filtro_col = st.columns([1, 1])
 with controles_col:
-    atualizar = st.button("🔄 Atualizar lista", use_container_width=True)
+    atualizar = st.button("Atualizar lista", use_container_width=True)
 with filtro_col:
-    mostrar_so_pendurados = st.checkbox("Mostrar apenas pendurados", value=False)
+    mostrar_so_pendurados = st.checkbox("Somente pendurados", value=False)
 
 if "usuarios" not in st.session_state or atualizar:
     with st.spinner("Buscando usuários online..."):
@@ -108,9 +98,9 @@ pendurados = [u for u in usuarios if u["minutos"] is not None and u["minutos"] >
 slots_livres = max(0, TOTAL_SLOTS - len(usuarios))
 
 render_metric_cards([
-    {"label": "Usuários online", "value": len(usuarios), "help": "Sessões visíveis no momento."},
-    {"label": f"Pendurados (>{LIMITE_MINUTOS} min)", "value": len(pendurados), "help": "Esses usuários aparecem com destaque.", "tone": "danger" if pendurados else ""},
-    {"label": f"Slots livres (de {TOTAL_SLOTS})", "value": slots_livres, "help": "Capacidade estimada restante no ambiente."},
+    {"label": "Online", "value": len(usuarios)},
+    {"label": f">{LIMITE_MINUTOS} min", "value": len(pendurados), "tone": "danger" if pendurados else ""},
+    {"label": "Livres", "value": slots_livres},
 ])
 
 st.divider()
@@ -131,11 +121,9 @@ usuarios_ordenados = sorted(
 if mostrar_so_pendurados:
     usuarios_ordenados = [u for u in usuarios_ordenados if u["minutos"] is not None and u["minutos"] >= LIMITE_MINUTOS]
 
-st.markdown("#### Usuários conectados")
-
 for usuario in usuarios_ordenados:
     pendurado = usuario["minutos"] is not None and usuario["minutos"] >= LIMITE_MINUTOS
-    badge = '<span class="badge-pend">⚠ Pendurado</span>' if pendurado else '<span class="badge-ok">✓ Ativo</span>'
+    badge = '<span class="badge-pend">Pendurado</span>' if pendurado else '<span class="badge-ok">Ativo</span>'
     minutos_txt = f"{usuario['minutos']} min" if usuario["minutos"] is not None else "—"
     card_class = "user-card pendurado" if pendurado else "user-card"
 
@@ -145,8 +133,8 @@ for usuario in usuarios_ordenados:
             f"""
             <div class="{card_class}">
                 <div>
-                    <div class="user-name">👤 {usuario['nome']}</div>
-                    <div class="user-info">Login: {usuario['data_login_str']} &nbsp;|&nbsp; {minutos_txt} conectado &nbsp;|&nbsp; IP: {usuario['ip']} &nbsp;|&nbsp; Tipo: {usuario['tipo'] or 'Não informado'}</div>
+                    <div class="user-name">{usuario['nome']}</div>
+                    <div class="user-info">{usuario['data_login_str']} &nbsp;|&nbsp; {minutos_txt} &nbsp;|&nbsp; IP: {usuario['ip']} &nbsp;|&nbsp; {usuario['tipo'] or 'Não informado'}</div>
                 </div>
                 <div>{badge}</div>
             </div>
@@ -176,10 +164,8 @@ for usuario in usuarios_ordenados:
 
 st.divider()
 
-if not pendurados:
-    st.success("Nenhum usuário pendurado. Tudo certo!")
-else:
-    if st.button(f"⚡ Desconectar todos os pendurados ({len(pendurados)})", type="primary"):
+if pendurados:
+    if st.button(f"Desconectar pendurados ({len(pendurados)})", type="primary", use_container_width=True):
         with st.spinner("Desconectando..."):
             try:
                 portal_login_id = st.session_state.get("portal_login_id")
@@ -192,7 +178,7 @@ else:
                     nomes = ", ".join(d["nome"] for d in desconectados)
                     st.success(f"{len(desconectados)} usuário(s) desconectado(s): {nomes}")
                 else:
-                    st.warning("Nenhum usuário foi desconectado (talvez já tenham saído).")
+                    st.warning("Nenhum usuário foi desconectado.")
                 st.session_state.pop("usuarios", None)
                 st.rerun()
             except Exception as exc:

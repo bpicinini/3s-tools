@@ -8,273 +8,245 @@ BASE_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap');
 
 :root {
-    --brand-900: #16324f;
-    --brand-700: #1f4f7a;
-    --brand-500: #2f7cb5;
-    --accent-500: #d6842a;
+    --brand-900: #1f3550;
+    --brand-700: #33567d;
+    --brand-500: #5279a3;
+    --accent-500: #d59d41;
+    --surface-app: #f6f2eb;
     --surface-0: #ffffff;
-    --surface-1: #f5f8fc;
-    --surface-2: #eaf1f8;
-    --border-1: #d5dfeb;
-    --text-1: #183247;
-    --text-2: #5b6773;
-    --shadow-soft: 0 16px 40px rgba(22, 50, 79, 0.08);
+    --surface-1: #f3eee6;
+    --border-1: #e4ddd1;
+    --border-2: #d8cfbf;
+    --text-1: #1f2933;
+    --text-2: #6e6254;
+    --shadow-soft: 0 10px 24px rgba(31, 53, 80, 0.06);
 }
 
-.stApp {
-    background:
-        radial-gradient(circle at top left, rgba(47, 124, 181, 0.12), transparent 28%),
-        radial-gradient(circle at top right, rgba(214, 132, 42, 0.10), transparent 24%),
-        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+html, body, [class*="css"] {
     font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
+.stApp {
+    background: var(--surface-app);
+    color: var(--text-1);
+}
+
 .main .block-container {
-    padding-top: 2.2rem;
-    padding-bottom: 2.5rem;
+    padding-top: 1.35rem;
+    padding-bottom: 2rem;
 }
 
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #16324f 0%, #1f4f7a 100%);
+    background: #fffdfa;
+    border-right: 1px solid var(--border-1);
 }
 
 [data-testid="stSidebar"] * {
-    color: #f6fbff;
+    color: var(--text-1);
 }
 
 [data-testid="stSidebarNav"] {
-    padding-top: 0.3rem;
+    padding-top: 0.35rem;
 }
 
 [data-testid="stSidebarNav"] a {
-    border-radius: 14px;
-    transition: background 0.2s ease, transform 0.2s ease;
+    border-radius: 10px;
+    margin-bottom: 0.12rem;
 }
 
 [data-testid="stSidebarNav"] a:hover {
-    background: rgba(255, 255, 255, 0.10);
-    transform: translateX(2px);
+    background: #f5efe6;
 }
 
 [data-testid="stSidebarNav"] a[data-testid="stSidebarNavLink-currentPage"] {
-    background: rgba(255, 255, 255, 0.16);
+    background: #f1ebe2;
+    color: var(--brand-900);
     font-weight: 700;
 }
 
 .sidebar-brand {
-    margin: 0.4rem 0 1rem 0;
-    padding: 1rem 1rem 0.95rem 1rem;
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    margin: 0 0 1rem 0;
+    padding: 0.15rem 0.1rem 1rem 0.1rem;
+    border-bottom: 1px solid var(--border-1);
 }
 
 .sidebar-brand-title {
     font-family: "Manrope", "IBM Plex Sans", sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.55rem;
     font-weight: 800;
-    letter-spacing: 0.01em;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--brand-900);
+}
+
+.sidebar-brand-title span {
+    color: var(--accent-500);
 }
 
 .sidebar-brand-subtitle {
-    margin-top: 0.28rem;
-    font-size: 0.84rem;
-    line-height: 1.45;
-    color: rgba(246, 251, 255, 0.82);
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-2);
 }
 
 .page-hero {
-    position: relative;
-    padding: 1.4rem 1.6rem;
-    border-radius: 22px;
-    border: 1px solid rgba(22, 50, 79, 0.08);
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 252, 0.96)),
-        linear-gradient(90deg, rgba(47, 124, 181, 0.12), rgba(214, 132, 42, 0.08));
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    background: var(--surface-0);
     box-shadow: var(--shadow-soft);
-    margin-bottom: 1.25rem;
-    overflow: hidden;
-    animation: fadeUp 0.45s ease;
-}
-
-.page-hero::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--brand-500), var(--accent-500));
-    opacity: 0.9;
+    margin-bottom: 1rem;
 }
 
 .page-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    border-radius: 999px;
-    padding: 0.32rem 0.7rem;
-    font-size: 0.78rem;
+    margin-bottom: 0.2rem;
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: rgba(22, 50, 79, 0.08);
-    color: var(--brand-900);
-    margin-bottom: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
 }
 
 .page-title {
     margin: 0;
-    color: var(--text-1);
-    font-size: 2rem;
-    line-height: 1.1;
+    color: var(--brand-900);
+    font-size: 1.45rem;
+    line-height: 1.05;
     font-weight: 800;
     font-family: "Manrope", "IBM Plex Sans", sans-serif;
 }
 
 .page-subtitle {
-    margin: 0.55rem 0 0 0;
+    margin: 0.22rem 0 0 0;
     color: var(--text-2);
-    font-size: 1rem;
-    line-height: 1.55;
-    max-width: 52rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
 }
 
 .metric-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(240, 246, 252, 0.92));
+    background: var(--surface-0);
     border: 1px solid var(--border-1);
-    border-radius: 18px;
-    padding: 1rem 1.1rem;
-    min-height: 106px;
-    box-shadow: 0 10px 24px rgba(22, 50, 79, 0.06);
-    animation: fadeUp 0.55s ease;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    box-shadow: var(--shadow-soft);
+    min-height: 84px;
 }
 
 .metric-card.metric-danger {
-    background: linear-gradient(180deg, rgba(253,236,235,0.95), rgba(255,255,255,0.98));
+    background: #fffaf6;
 }
 
 .metric-label {
     color: var(--text-2);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     font-weight: 700;
 }
 
 .metric-value {
     color: var(--brand-900);
-    font-size: 1.95rem;
+    font-size: 1.55rem;
     line-height: 1.05;
     font-weight: 800;
-    margin-top: 0.45rem;
+    margin-top: 0.35rem;
     font-family: "Manrope", "IBM Plex Sans", sans-serif;
 }
 
 .metric-help {
     color: var(--text-2);
-    font-size: 0.84rem;
-    margin-top: 0.55rem;
-    line-height: 1.4;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    line-height: 1.35;
 }
 
 .info-panel {
-    background: rgba(255,255,255,0.9);
+    background: var(--surface-0);
     border: 1px solid var(--border-1);
-    border-radius: 18px;
-    padding: 1rem 1.15rem;
-    box-shadow: 0 8px 22px rgba(22, 50, 79, 0.05);
-    animation: fadeUp 0.65s ease;
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    box-shadow: var(--shadow-soft);
 }
 
 .info-panel h3 {
-    margin: 0 0 0.4rem 0;
+    margin: 0 0 0.3rem 0;
     color: var(--brand-900);
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-family: "Manrope", "IBM Plex Sans", sans-serif;
 }
 
 .info-panel p {
     margin: 0;
     color: var(--text-2);
-    line-height: 1.55;
+    line-height: 1.45;
 }
 
 .chip-row {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.45rem;
     flex-wrap: wrap;
-    margin-top: 0.8rem;
+    margin-top: 0.6rem;
 }
 
 .info-chip {
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    padding: 0.34rem 0.7rem;
-    background: var(--surface-2);
+    padding: 0.2rem 0.6rem;
+    background: var(--surface-1);
     color: var(--brand-900);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     font-weight: 700;
 }
 
 .stButton > button,
 .stDownloadButton > button {
-    border-radius: 14px;
-    border: 1px solid var(--border-1);
-    box-shadow: 0 10px 24px rgba(22, 50, 79, 0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid var(--border-2);
+    box-shadow: none;
 }
 
 .stButton > button:hover,
 .stDownloadButton > button:hover {
-    transform: translateY(-1px);
-    border-color: rgba(31, 79, 122, 0.45);
-    box-shadow: 0 14px 26px rgba(22, 50, 79, 0.10);
+    border-color: var(--brand-500);
 }
 
+.stButton > button[kind="primary"],
 .stDownloadButton > button {
-    background: linear-gradient(180deg, #214d76, #16324f);
-    color: #f8fbff;
+    background: var(--brand-900);
+    color: #ffffff;
 }
 
 [data-testid="stFileUploader"] {
-    background: rgba(255,255,255,0.8);
-    border: 1px dashed rgba(31, 79, 122, 0.35);
-    border-radius: 18px;
-    padding: 0.5rem;
+    background: var(--surface-0);
+    border: 1px dashed var(--border-2);
+    border-radius: 14px;
+    padding: 0.35rem;
 }
 
 [data-testid="stFileUploader"] section {
     border: none;
 }
 
+[data-testid="stExpander"] {
+    background: var(--surface-0);
+    border: 1px solid var(--border-1);
+    border-radius: 14px;
+}
+
+[data-testid="stDataFrame"] {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border-1);
+}
+
 .streamlit-expanderHeader {
-    font-family: "Manrope", "IBM Plex Sans", sans-serif;
     font-weight: 700;
     color: var(--brand-900);
 }
 
-[data-testid="stExpander"] {
-    background: rgba(255,255,255,0.75);
-    border: 1px solid var(--border-1);
-    border-radius: 18px;
-}
-
-[data-testid="stDataFrame"] {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid rgba(22, 50, 79, 0.08);
-}
-
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.stAlert {
+    border-radius: 12px;
 }
 </style>
 """
@@ -284,31 +256,33 @@ def apply_base_style() -> None:
     st.markdown(BASE_CSS, unsafe_allow_html=True)
 
 
-def render_sidebar_brand(title: str = "3S Tools", subtitle: str = "Portal operacional com foco em velocidade e clareza.") -> None:
+def render_sidebar_brand(title: str = "3S Tools", subtitle: str | None = None) -> None:
+    subtitle_html = (
+        f'<div class="sidebar-brand-subtitle">{html.escape(subtitle)}</div>'
+        if subtitle
+        else ""
+    )
     with st.sidebar:
         st.markdown(
             f"""
             <section class="sidebar-brand">
-                <div class="sidebar-brand-title">{html.escape(title)}</div>
-                <div class="sidebar-brand-subtitle">{html.escape(subtitle)}</div>
+                <div class="sidebar-brand-title">3S <span>Tools</span></div>
+                {subtitle_html}
             </section>
             """,
             unsafe_allow_html=True,
         )
 
 
-def render_page_header(title: str, subtitle: str, kicker: str | None = None) -> None:
-    kicker_html = (
-        f'<div class="page-kicker">{html.escape(kicker)}</div>'
-        if kicker
-        else ""
-    )
+def render_page_header(title: str, subtitle: str | None = None, kicker: str | None = None) -> None:
+    kicker_html = f'<div class="page-kicker">{html.escape(kicker)}</div>' if kicker else ""
+    subtitle_html = f'<p class="page-subtitle">{html.escape(subtitle)}</p>' if subtitle else ""
     st.markdown(
         f"""
         <section class="page-hero">
             {kicker_html}
             <h1 class="page-title">{html.escape(title)}</h1>
-            <p class="page-subtitle">{html.escape(subtitle)}</p>
+            {subtitle_html}
         </section>
         """,
         unsafe_allow_html=True,
