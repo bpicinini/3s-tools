@@ -15,19 +15,11 @@ except Exception:
     st.error("Credenciais TecWin não configuradas. Fale com o administrador do portal.")
     st.stop()
 
+limite = LIMITE_MINUTOS
+
 st.divider()
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    limite = st.number_input(
-        "Limite de sessão (minutos)",
-        min_value=5, max_value=480, value=LIMITE_MINUTOS, step=5,
-        help="Usuários conectados há mais tempo que isso serão marcados como pendurados."
-    )
-with col2:
-    st.write("")
-    st.write("")
-    atualizar = st.button("Atualizar lista", use_container_width=True)
+atualizar = st.button("Atualizar lista")
 
 st.divider()
 
