@@ -1,6 +1,6 @@
 import streamlit as st
 
-from modules.tecwin.tecwin import desconectar_pendurados, desconectar_usuario, listar_usuarios_online, login
+from modules.tecwin.tecwin import desconectar_pendurados, desconectar_usuario, forcar_entrada, listar_usuarios_online
 from modules.ui import apply_base_style, render_metric_cards, render_page_header, render_sidebar_brand
 
 
@@ -35,10 +35,27 @@ st.markdown("""
 render_page_header("Acessos TECWIN", "Monitoramento de sessões.")
 
 
+@st.dialog("Limite de conexões atingido")
+def _popup_limite(desconectados):
+    st.warning("O limite de conexões simultâneas foi atingido.")
+    st.markdown(
+        f"Para garantir o acesso, **{len(desconectados)}** usuário(s) "
+        "foram desconectados automaticamente:"
+    )
+    for u in desconectados:
+        minutos_txt = f"{u['minutos']} min" if u["minutos"] is not None else "—"
+        st.markdown(f"- **{u['nome']}** — {minutos_txt}")
+    if st.button("OK", use_container_width=True, type="primary"):
+        st.session_state.pop("_desconectados_auto", None)
+        st.rerun()
+
+
 def conectar_tecwin(login_usuario, senha_usuario):
-    session, portal_login_id = login(login_usuario, senha_usuario)
+    session, portal_login_id, desconectados = forcar_entrada(login_usuario, senha_usuario)
     st.session_state["session"] = session
     st.session_state["portal_login_id"] = portal_login_id
+    if desconectados:
+        st.session_state["_desconectados_auto"] = desconectados
     return session, portal_login_id
 
 
@@ -48,8 +65,9 @@ def listar_com_relogin(login_usuario, senha_usuario):
         portal_login_id = st.session_state.get("portal_login_id")
         return listar_usuarios_online(session, excluir_login_id=portal_login_id)
     except Exception:
-        session, portal_login_id = conectar_tecwin(login_usuario, senha_usuario)
-        return listar_usuarios_online(session, excluir_login_id=portal_login_id)
+        conectar_tecwin(login_usuario, senha_usuario)
+        portal_login_id = st.session_state.get("portal_login_id")
+        return listar_usuarios_online(st.session_state["session"], excluir_login_id=portal_login_id)
 
 
 def executar_desconexao(login_usuario, senha_usuario, acao):
@@ -79,6 +97,9 @@ if "session" not in st.session_state:
         except Exception as exc:
             st.error(f"Erro inesperado: {exc}")
             st.stop()
+
+if "_desconectados_auto" in st.session_state:
+    _popup_limite(st.session_state["_desconectados_auto"])
 
 controles_col, filtro_col = st.columns([1, 1])
 with controles_col:
