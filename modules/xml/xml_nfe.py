@@ -35,6 +35,15 @@ def _remover_horario_data(tree, campos, alteracoes):
                 })
 
 
+def _restaurar_elementos_vazios(tree):
+    """lxml converte <tag></tag> para <tag/> no round-trip.
+    O Excel só cria a tabela com cabeçalhos quando elementos vazios usam
+    a forma explícita <tag></tag>, por isso preservamos esse formato."""
+    for el in tree.iter():
+        if el.text is None and not list(el):
+            el.text = ""
+
+
 def processar_xml(xml_bytes, regras=None):
     parser = etree.XMLParser(remove_blank_text=False)
     tree = etree.fromstring(xml_bytes, parser)
@@ -75,6 +84,8 @@ def processar_xml(xml_bytes, regras=None):
                 "xProd_antes": xprod_antes,
                 "xProd_depois": novo_xprod,
             })
+
+    _restaurar_elementos_vazios(tree)
 
     usa_crlf = b"\r\n" in xml_bytes
 
