@@ -8,5 +8,14 @@
         "inserir_cProd_se_ausente": true
       }
     ]
+  },
+  "Resfri Ar": {
+    "descricao": "Remove horário e timezone das tags de data, mantendo apenas AAAA-MM-DD",
+    "regras": [
+      {
+        "tipo": "remover_horario_data",
+        "campos": ["dhEmi", "dhSaiEnt"]
+      }
+    ]
   }
 }

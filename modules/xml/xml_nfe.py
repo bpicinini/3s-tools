@@ -20,12 +20,31 @@ def _criar_ou_atualizar_inf_ad_prod(det, prod, inf_ad_el, novo_inf_ad):
     det.insert(indice_prod + 1, novo_el)
 
 
-def processar_xml(xml_bytes):
-    """Processa um XML de NF-e, reordenando as descrições dos itens."""
+def _remover_horario_data(tree, campos, alteracoes):
+    for campo in campos:
+        for el in tree.findall(f".//nfe:{campo}", NS):
+            valor = el.text or ""
+            if "T" in valor:
+                novo_valor = valor[:10]
+                el.text = novo_valor
+                alteracoes.append({
+                    "nItem": campo,
+                    "cProd": "",
+                    "xProd_antes": valor,
+                    "xProd_depois": novo_valor,
+                })
+
+
+def processar_xml(xml_bytes, regras=None):
     parser = etree.XMLParser(remove_blank_text=False)
     tree = etree.fromstring(xml_bytes, parser)
 
     alteracoes = []
+
+    for regra in regras or []:
+        if regra.get("tipo") == "remover_horario_data":
+            _remover_horario_data(tree, regra.get("campos", []), alteracoes)
+
     itens = tree.findall(".//nfe:det", NS)
 
     for det in itens:
