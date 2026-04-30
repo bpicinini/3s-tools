@@ -76,5 +76,17 @@ def processar_xml(xml_bytes, regras=None):
                 "xProd_depois": novo_xprod,
             })
 
+    usa_crlf = b"\r\n" in xml_bytes
+
     xml_corrigido = etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+    # lxml gera a declaração com aspas simples; Excel exige aspas duplas
+    xml_corrigido = xml_corrigido.replace(
+        b"<?xml version='1.0' encoding='UTF-8'?>",
+        b'<?xml version="1.0" encoding="UTF-8"?>',
+    )
+
+    if usa_crlf:
+        xml_corrigido = xml_corrigido.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+
     return xml_corrigido, alteracoes
