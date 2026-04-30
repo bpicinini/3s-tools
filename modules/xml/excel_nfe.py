@@ -29,7 +29,7 @@ def processar_excel(excel_bytes):
 
     col_nitem, col_cprod, col_xprod, col_infad = encontrar_colunas(ws)
 
-    if not col_cprod or not col_xprod:
+    if col_cprod is None or col_xprod is None:
         return excel_bytes, []
 
     alteracoes = []
@@ -40,7 +40,9 @@ def processar_excel(excel_bytes):
         infad = ws.cell(row=row, column=col_infad).value if col_infad else ""
         nitem = ws.cell(row=row, column=col_nitem).value if col_nitem else row - 1
 
-        if not cprod or not xprod:
+        if cprod is None or xprod is None:
+            continue
+        if str(cprod).strip() == "" or str(xprod).strip() == "":
             continue
 
         cprod = str(cprod)
