@@ -21,11 +21,11 @@ def inicializar_estado():
     st.session_state.setdefault("xml_processamento", None)
 
 
-def processar_arquivo(arquivo):
+def processar_arquivo(arquivo, regras=None):
     dados = arquivo.read()
     nome = arquivo.name.lower()
     if nome.endswith(".xml"):
-        corrigido, alteracoes = processar_xml(dados)
+        corrigido, alteracoes = processar_xml(dados, regras=regras)
         mime = "application/xml"
         extensao = ".xml"
     elif nome.endswith(".xlsx"):
@@ -87,9 +87,10 @@ if st.button("Processar arquivos", type="primary", use_container_width=True):
         "resultados": [],
         "erros": [],
     }
+    regras = clientes[cliente].get("regras", [])
     for arquivo in arquivos:
         try:
-            resultado = processar_arquivo(arquivo)
+            resultado = processar_arquivo(arquivo, regras=regras)
         except Exception as exc:
             processamento["erros"].append({"nome": arquivo.name, "erro": str(exc)})
             continue
