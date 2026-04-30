@@ -44,6 +44,60 @@ def _restaurar_elementos_vazios(tree):
             el.text = ""
 
 
+def _normalizar_estrutura_repetida_para_excel(tree):
+    """Padroniza a ordem/presença de filhos em elementos repetidos.
+
+    O Excel infere colunas a partir da estrutura do XML. Quando elementos irmãos
+    repetidos têm filhos em ordem diferente ou com ausência de tags em alguns
+    registros, ele pode quebrar o layout tabular (sem cabeçalhos/colunas
+    desalinhadas). Aqui garantimos consistência estrutural sem alterar valores.
+    """
+    for parent in tree.iter():
+        grupos = {}
+        for child in list(parent):
+            if not isinstance(child.tag, str):
+                continue
+            grupos.setdefault(child.tag, []).append(child)
+
+        for elementos in grupos.values():
+            if len(elementos) < 2:
+                continue
+
+            # Evita mexer em estruturas com tags duplicadas no mesmo nível.
+            possui_duplicadas = False
+            for el in elementos:
+                tags = [c.tag for c in list(el) if isinstance(c.tag, str)]
+                if len(tags) != len(set(tags)):
+                    possui_duplicadas = True
+                    break
+            if possui_duplicadas:
+                continue
+
+            ordem_filhos = []
+            for el in elementos:
+                for c in list(el):
+                    if isinstance(c.tag, str) and c.tag not in ordem_filhos:
+                        ordem_filhos.append(c.tag)
+
+            for el in elementos:
+                atuais = [c for c in list(el) if isinstance(c.tag, str)]
+                por_tag = {c.tag: c for c in atuais}
+
+                # Garante presença de todas as tags na ordem consolidada.
+                for tag in ordem_filhos:
+                    if tag not in por_tag:
+                        novo = etree.Element(tag)
+                        novo.text = ""
+                        el.append(novo)
+                        por_tag[tag] = novo
+
+                # Reordena os filhos para manter consistência entre linhas.
+                for c in list(el):
+                    el.remove(c)
+                for tag in ordem_filhos:
+                    el.append(por_tag[tag])
+
+
 def processar_xml(xml_bytes, regras=None):
     parser = etree.XMLParser(remove_blank_text=False)
     tree = etree.fromstring(xml_bytes, parser)
@@ -86,6 +140,7 @@ def processar_xml(xml_bytes, regras=None):
             })
 
     _restaurar_elementos_vazios(tree)
+    _normalizar_estrutura_repetida_para_excel(tree)
 
     usa_crlf = b"\r\n" in xml_bytes
 
