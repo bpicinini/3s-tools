@@ -17,5 +17,10 @@
         "campos": ["dhEmi", "dhSaiEnt"]
       }
     ]
+  },
+  "Conexão Malhas": {
+    "descricao": "Converte XML de extrato DUIMP para o modelo XML exigido pelo sistema TOTVS",
+    "modo": "duimp_totvs",
+    "regras": []
   }
 }
