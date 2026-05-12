@@ -1,6 +1,6 @@
 import streamlit as st
 
-from modules.tecwin.tecwin import desconectar_pendurados, desconectar_usuario, listar_usuarios_online, login
+from modules.tecwin.tecwin import desconectar_pendurados, desconectar_usuario, listar_usuarios_online, login, login_emergencial
 from modules.ui import apply_base_style, render_metric_cards, render_page_header, render_sidebar_brand
 
 
@@ -74,8 +74,22 @@ if "session" not in st.session_state:
         try:
             conectar_tecwin(TECWIN_LOGIN, TECWIN_SENHA)
         except RuntimeError as exc:
-            st.error(f"Erro ao conectar: {exc}")
-            st.stop()
+            if "Limite" in str(exc):
+                with st.spinner("Limite atingido. Liberando as 2 sessões mais antigas automaticamente..."):
+                    try:
+                        session, portal_login_id = login_emergencial(TECWIN_LOGIN, TECWIN_SENHA)
+                        st.session_state["session"] = session
+                        st.session_state["portal_login_id"] = portal_login_id
+                        st.toast("Acesso liberado: 2 sessões antigas foram desconectadas.", icon="⚠️")
+                    except RuntimeError as exc2:
+                        st.error(f"Erro ao conectar: {exc2}")
+                        st.stop()
+                    except Exception as exc2:
+                        st.error(f"Erro inesperado ao liberar conexões: {exc2}")
+                        st.stop()
+            else:
+                st.error(f"Erro ao conectar: {exc}")
+                st.stop()
         except Exception as exc:
             st.error(f"Erro inesperado: {exc}")
             st.stop()
