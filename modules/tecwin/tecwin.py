@@ -66,6 +66,79 @@ def login(email: str, senha: str) -> tuple[requests.Session, str | None]:
     return session, portal_login_id
 
 
+_ERROS_LIMITE = {"LIMITE", "LOGADOS"}
+
+
+def login_emergencial(email: str, senha: str) -> tuple[requests.Session, str | None]:
+    """Tenta conectar mesmo com o limite atingido.
+
+    Estratégia:
+    1. Faz o login normalmente; se o status for de limite (LOGADOS/LIMITE),
+       tenta obter a lista de sessões ativas (às vezes a própria resposta de
+       erro as inclui, ou os cookies parciais permitem chamar action=12).
+    2. Desconecta as 2 sessões mais antigas encontradas.
+    3. Refaz o login normal.
+
+    Lança RuntimeError se não conseguir liberar espaço.
+    """
+    session = requests.Session()
+    session.headers.update(HEADERS)
+
+    resp = session.post(URL_LOGIN_HANDLER, data={
+        "action": "2",
+        "login": email,
+        "senha": senha,
+        "salvarLogin": "false",
+    }, timeout=15)
+    resp.raise_for_status()
+
+    data = resp.json()
+    status = data.get("status", "")
+
+    if status not in _ERROS_LIMITE:
+        raise RuntimeError(f"login_emergencial chamado mas status foi '{status}' (esperado LIMITE/LOGADOS).")
+
+    # Algumas versões do TecWin retornam listaFilhotes direto na resposta de erro
+    filhotes = data.get("listaFilhotes", [])
+
+    # Se a resposta de erro não trouxe as sessões, tenta com os cookies parciais
+    if not filhotes:
+        try:
+            resp2 = session.post(URL_CONFIG_HANDLER, data={"action": "12"}, timeout=15)
+            filhotes = resp2.json().get("listaFilhotes", [])
+        except Exception:
+            filhotes = []
+
+    if not filhotes:
+        raise RuntimeError(
+            "Limite de conexões atingido e não foi possível listar as sessões ativas "
+            "para liberar espaço automaticamente."
+        )
+
+    # Ordenar mais antigos primeiro e desconectar os 2 primeiros
+    ordenados = sorted(
+        [f for f in filhotes if f.get("loginId")],
+        key=lambda u: _parsear_data(u.get("dataLogin", "")) or datetime.min,
+    )
+
+    desconectados = 0
+    for u in ordenados[:2]:
+        try:
+            session.post(URL_CONFIG_HANDLER, data={
+                "action": "14",
+                "loginId": str(u.get("loginId", "")),
+            }, timeout=15)
+            desconectados += 1
+        except Exception:
+            pass
+
+    if desconectados == 0:
+        raise RuntimeError("Limite atingido, mas não foi possível desconectar nenhuma sessão existente.")
+
+    # Agora tenta o login normal com a vaga liberada
+    return login(email, senha)
+
+
 def _capturar_proprio_login_id(session: requests.Session) -> str | None:
     """Chama action=12 logo após o login para capturar o loginId da sessão do portal.
 
